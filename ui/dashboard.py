@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
+import threading
 
 from data.macro_data import get_macro_snapshot
 
@@ -16,7 +17,9 @@ class MacroDashboard(tk.Tk):
 
         self.create_layout()
         self.populate_macro_column()
-        self.refresh_macro_data()
+
+        # Start async data load
+        self.load_macro_data_async()
 
     def create_layout(self):
         self.main_frame = ttk.Frame(self)
@@ -55,21 +58,23 @@ class MacroDashboard(tk.Tk):
         label = ttk.Label(frame, text=name)
         label.pack(side="left")
 
-        value_label = ttk.Label(frame, text="—", font=("Helvetica", 10, "bold"))
+        # Start with "LOADING..."
+        value_label = ttk.Label(frame, text="LOADING...", font=("Helvetica", 10, "bold"))
         value_label.pack(side="right")
 
         self.value_labels[name] = value_label
 
-    def refresh_macro_data(self):
-        data = get_macro_snapshot()
+    def load_macro_data_async(self):
+        """Fetch macro data in a background thread to avoid blocking the GUI."""
+        threading.Thread(target=self._load_macro_data, daemon=True).start()
 
+    def _load_macro_data(self):
+        data = get_macro_snapshot()
         for name, value in data.items():
-            label = self.value_labels.get(name)
-            if label:
-                if value is None:
-                    label.config(text="—")
-                else:
-                    label.config(text=f"{value:.2f}")
+            display = f"{value:.2f}" if value is not None else "Error"
+            # Use self.after to safely update Tkinter from another thread
+            self.after(0, lambda l=self.value_labels[name], d=display: l.config(text=d))
+
 
 if __name__ == "__main__":
     app = MacroDashboard()
