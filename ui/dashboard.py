@@ -2,6 +2,11 @@ import tkinter as tk
 from tkinter import ttk
 import threading
 import sv_ttk
+from dotenv import load_dotenv
+from pathlib import Path
+from data.DSA_selection import get_topic
+
+load_dotenv(Path(__file__).resolve().parents[1] / "config.env")
 
 from data.macro_data import (
     real_gdp_growth,
@@ -61,15 +66,27 @@ class MacroDashboard(tk.Tk):
         self.tree.configure(yscroll=scrollbar.set)
         scrollbar.pack(side="right", fill="y")
 
-        # Right: Placeholder
+        # Right: container
         self.other_frame = ttk.Frame(self.main_frame)
         self.other_frame.pack(side="right", fill="both", expand=True, padx=10, pady=10)
 
+        # (Optional) placeholder / future section
         ttk.Label(
             self.other_frame,
-            text="Your Other Data Goes Here",
+            text="CONCEPTS TO LEARN ABOUT:",
             font=("Helvetica", 14)
-        ).pack(anchor="center", pady=20)
+        ).pack(anchor="w", pady=(0, 20))
+
+        # Daily Macro Topic section
+        self.topic_label = ttk.Label(
+            self.other_frame,
+            text=get_topic(),
+            wraplength=350,
+            font=("Helvetica", 12),
+            justify="left"
+        )
+        self.topic_label.pack(anchor="w")
+
 
     def populate_table(self):
         # Define indicators as (label, function) pairs
