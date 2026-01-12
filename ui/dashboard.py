@@ -28,7 +28,7 @@ class MacroDashboard(tk.Tk):
         # Enable dark mode
         sv_ttk.set_theme("dark")
 
-        self.title("US Macro Dashboard")
+        self.title("Nucleus Dawn")
         self.geometry("900x600")
         self.configure(bg="#1e1e1e")
 
